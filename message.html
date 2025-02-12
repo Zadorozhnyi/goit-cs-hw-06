@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Повідомлення</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Надішліть повідомлення</h1>
+    <form id="messageForm">
+        <input type="text" id="username" placeholder="Ваше ім'я" required>
+        <textarea id="message" placeholder="Ваше повідомлення" required></textarea>
+        <button type="submit">Надіслати</button>
+    </form>
+    <script>
+        document.getElementById("messageForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let username = document.getElementById("username").value;
+            let message = document.getElementById("message").value;
+
+            fetch("/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, message })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.status))
+            .catch(error => console.error(error));
+        });
+    </script>
+</body>
+</html>
