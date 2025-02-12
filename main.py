@@ -26,10 +26,19 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.path = "/message.html"
         elif self.path.startswith("/static/"):
             pass  # Обробка стилів та логотипу
+        elif self.path == "/messages":  # НОВИЙ РОУТ для отримання повідомлень
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            
+            messages = list(collection.find({}, {"_id": 0}))  # Вибірка всіх повідомлень без _id
+            self.wfile.write(json.dumps(messages).encode())
+            return
         else:
             self.path = "/error.html"
         
         return http.server.SimpleHTTPRequestHandler.do_GET(self)
+
 
     def do_POST(self):
         if self.path == "/send":
@@ -53,6 +62,7 @@ def send_to_socket_server(data):
 # Запуск HTTP-сервера
 def start_http_server():
     with socketserver.TCPServer(("0.0.0.0", HTTP_PORT), MyHTTPRequestHandler) as httpd:
+        httpd.allow_reuse_address = True  # Додаємо дозвіл на повторне використання порту
         print(f"HTTP сервер працює на порту {HTTP_PORT}")
         httpd.serve_forever()
 

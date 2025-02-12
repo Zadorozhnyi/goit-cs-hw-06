@@ -1,16 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Повідомлення</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <h1>Надішліть повідомлення</h1>
+    <header>
+        <img src="static/logo.png" alt="Логотип" class="logo">
+        <h1>Надішліть повідомлення</h1>
+    </header>
+    
     <form id="messageForm">
         <input type="text" id="username" placeholder="Ваше ім'я" required>
         <textarea id="message" placeholder="Ваше повідомлення" required></textarea>
         <button type="submit">Надіслати</button>
     </form>
+
+    <h2>Історія повідомлень</h2>
+    <ul id="messageList"></ul>
+
+    <footer>
+        <p>&copy; 2025 Чат-сервер. Всі права захищені.</p>
+    </footer>
+
     <script>
         document.getElementById("messageForm").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -23,9 +37,29 @@
                 body: JSON.stringify({ username, message })
             })
             .then(response => response.json())
-            .then(data => alert(data.status))
+            .then(data => {
+                alert(data.status);
+                document.getElementById("message").value = "";
+                loadMessages();
+            })
             .catch(error => console.error(error));
         });
+
+        function loadMessages() {
+            fetch("/messages")
+                .then(response => response.json())
+                .then(data => {
+                    let messageList = document.getElementById("messageList");
+                    messageList.innerHTML = "";
+                    data.forEach(msg => {
+                        let listItem = document.createElement("li");
+                        listItem.innerHTML = `<strong>${msg.username}</strong> [${msg.date}]<br>${msg.message}`;
+                        messageList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
+        loadMessages();
     </script>
 </body>
 </html>
